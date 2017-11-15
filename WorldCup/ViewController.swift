@@ -38,10 +38,13 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     let fetchRequest: NSFetchRequest<Team> = Team.fetchRequest()
-    let sort = NSSortDescriptor(key: #keyPath(Team.teamName), ascending: true)
-    fetchRequest.sortDescriptors = [sort]
 
-    fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.managedContext, sectionNameKeyPath: nil, cacheName: nil)
+    let zoneSort = NSSortDescriptor(key: #keyPath(Team.qualifyingZone), ascending: true)
+    let scoreSort = NSSortDescriptor(key: #keyPath(Team.wins), ascending: false)
+    let nameSort = NSSortDescriptor(key: #keyPath(Team.teamName), ascending: true)
+    fetchRequest.sortDescriptors = [zoneSort, scoreSort, nameSort]
+
+    fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreDataStack.managedContext, sectionNameKeyPath: #keyPath(Team.qualifyingZone), cacheName: nil)
 
     do {
       try fetchedResultsController.performFetch()
@@ -72,6 +75,11 @@ extension ViewController: UITableViewDataSource {
   func numberOfSections(in tableView: UITableView) -> Int {
     guard let sections = fetchedResultsController.sections else { return 0 }
     return sections.count
+  }
+
+  func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    let sectionInfo = fetchedResultsController.sections?[section]
+    return sectionInfo?.name
   }
 
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

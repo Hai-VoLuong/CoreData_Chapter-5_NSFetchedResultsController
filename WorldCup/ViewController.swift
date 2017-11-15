@@ -53,6 +53,13 @@ class ViewController: UIViewController {
       print("Fetching error: \(error), description: \(error.userInfo)")
     }
   }
+
+  override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+    if motion == .motionShake {
+      addButton.isEnabled = true
+    }
+  }
+
 }
 
 // MARK: - Internal
@@ -68,6 +75,32 @@ extension ViewController {
     cell.teamLabel.text = team.teamName
     cell.scoreLabel.text = "Wins: \(team.wins)"
   }
+
+  @IBAction func addTeam(_ sender: AnyObject) {
+    let alert = UIAlertController(title: "Secret Team", message: "Add a new team", preferredStyle: .alert)
+    alert.addTextField { textField in
+      textField.placeholder = "Team Name"
+    }
+
+    alert.addTextField { textField in
+      textField.placeholder = "Qualifying Zone"
+    }
+
+    let saveAction = UIAlertAction(title: "Save", style: .default) { [unowned self] action in
+      guard let nameTextField = alert.textFields?.first, let zoneTextField = alert.textFields?.last else { return }
+      let team = Team(context: self.coreDataStack.managedContext)
+
+      team.teamName = nameTextField.text
+      team.qualifyingZone = zoneTextField.text
+      team.imageName = "wenderland-flag"
+      self.coreDataStack.saveContext()
+    }
+
+    alert.addAction(saveAction)
+    alert.addAction(UIAlertAction(title: "Cancel", style: .default))
+    present(alert, animated: true)
+  }
+
 }
 
 // MARK: - UITableViewDataSource
@@ -104,7 +137,6 @@ extension ViewController: UITableViewDelegate {
     let team = fetchedResultsController.object(at: indexPath)
     team.wins = team.wins + 1
     coreDataStack.saveContext()
-
   }
 }
 
